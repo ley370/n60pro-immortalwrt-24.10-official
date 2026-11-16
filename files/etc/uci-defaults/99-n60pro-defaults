@@ -1,0 +1,31 @@
+#!/bin/sh
+# 99-n60pro-defaults - first-boot settings for the N60 Pro custom build
+# Runs once on first boot, then deletes itself.
+#
+# v4: use `uci -q` (quiet) so a single failing line cannot abort the script
+# or block its deletion (a uci-defaults script that exits non-zero may be
+# kept and re-run on every boot, overwriting manual changes). The script
+# always ends with `exit 0`.
+
+# v13: default LAN 192.168.10.1/24 (user decision, scheme B: ONT stays in
+# routing mode, N60 does not dial; its 192.168.1.1/24 overlaps the ONT LAN).
+# DHCP range/lease stay at defaults (start 100, limit 150), so clients get
+# 192.168.10.100-249 with gateway 192.168.10.1. AP (Xiaomi BE6500) is a
+# separate device and keeps its own fixed 192.168.10.2 -- not set here.
+# This only applies on first boot of a fresh flash (script deletes itself);
+# it does not change the LAN of an already-running router.
+uci -q set network.lan.ipaddr='192.168.10.1'
+uci -q commit network
+
+# Disable wireless by default (wired main router; AP is a separate Xiaomi BE6500)
+uci -q set wireless.radio0.disabled='1'
+uci -q set wireless.radio1.disabled='1'
+uci -q commit wireless
+
+# Default LuCI theme: Argon
+uci -q set luci.main.mediaurlbase='/luci-static/argon'
+# Default LuCI language: Simplified Chinese
+uci -q set luci.main.lang='zh_cn'
+uci -q commit luci
+
+exit 0
